@@ -16,11 +16,13 @@ import java.util.Arrays;
 import java.util.Properties;
 
 public class KafkaTweetsConsumer {
-    static String BOOTSTRAP_SERVERS_CONFIG = "127.0.0.1:9092";
     static Logger logger = LoggerFactory.getLogger(KafkaTweetsConsumer.class);
+
+    static String BOOTSTRAP_SERVERS_CONFIG = "127.0.0.1:9092";
     static String GROUP_ID_CONFIG = "kafka-demo-elasticsearch";
     static String AUTO_OFFSET_RESET_CONFIG = "earliest";
     static String TOPIC = "twitter_tweets";
+    static int POLL_MS = 100;
 
     public static void main(String[] args) {
         KafkaTweetsConsumer kafkaTweetsConsumer = new KafkaTweetsConsumer();
@@ -35,7 +37,7 @@ public class KafkaTweetsConsumer {
 
         //consume
         while (true) {
-            ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
+            ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(POLL_MS));
             for (ConsumerRecord<String, String> record : records) {
                 //insert data into elastic search
                 String tweet = record.value();
