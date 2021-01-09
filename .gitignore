@@ -36,3 +36,4 @@ build/
 
 ### API KEYS ###
 /kafka-twitter/src/main/resources/apikey.properties
+/kafka-elalstic-search/src/main/resources/bonsai.properties

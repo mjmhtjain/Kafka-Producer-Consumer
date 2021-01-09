@@ -27,10 +27,10 @@ public class TwitterProducer {
     private Properties TWITTER_API_KEYS = new Properties();
     Logger logger = LoggerFactory.getLogger(TwitterProducer.class);
 
-    String consumerKey = null;
-    String consumerSecret = null;
-    String token = null;
-    String secret = null;
+    private String consumerKey = null;
+    private String consumerSecret = null;
+    private String token = null;
+    private String secret = null;
 
     public void loadAPIKeys() {
         InputStream apiKeyFile = this.getClass()
