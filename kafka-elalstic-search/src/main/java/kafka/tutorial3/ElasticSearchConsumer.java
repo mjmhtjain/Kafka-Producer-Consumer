@@ -25,21 +25,24 @@ public class ElasticSearchConsumer {
     Logger loggger = LoggerFactory.getLogger(ElasticSearchConsumer.class);
     private Properties BONZAI_PROPERTIES = new Properties();
     private String BONSAI_URL;
+    RestHighLevelClient client;
+
+    public ElasticSearchConsumer() {
+        //load bonzai properties
+        loadAPIKeys();
+
+        //init bonzai rest client
+        client = restClient();
+    }
 
     public static void main(String[] args) throws IOException {
         ElasticSearchConsumer elasticSearchConsumer = new ElasticSearchConsumer();
 
-        //load bonzai properties
-        elasticSearchConsumer.loadAPIKeys();
-
-        //init bonzai rest client
-        RestHighLevelClient client = elasticSearchConsumer.restClient();
-
         //start elastic search consumer
-        elasticSearchConsumer.search(client);
+        elasticSearchConsumer.sendData();
     }
 
-    private void search(RestHighLevelClient client) throws IOException {
+    private void sendData() throws IOException {
         String index = "twitter";
         String type = "tweets";
         String jsonString = "{\"foo\":\"bar\"}";
@@ -53,6 +56,24 @@ public class ElasticSearchConsumer {
         loggger.info(id);
 
         client.close();
+    }
+
+    void sendDataWithoutClose(String tweet, String tweetId) throws IOException {
+        String index = "twitter";
+        String type = "tweets";
+
+        IndexRequest indexRequest = new IndexRequest(
+                index,
+                type,
+                tweetId //this is to make our request idempotent
+        )
+                .source(tweet, XContentType.JSON);
+
+        IndexResponse response = client.index(indexRequest, RequestOptions.DEFAULT);
+
+        loggger.info(response.getId());
+
+//        client.close();
     }
 
     public RestHighLevelClient restClient() {
