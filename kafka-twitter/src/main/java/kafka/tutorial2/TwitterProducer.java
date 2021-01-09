@@ -15,6 +15,8 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
@@ -22,12 +24,31 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class TwitterProducer {
     static String BOOTSTRAP_SERVERS = "127.0.0.1:9092";
+    private Properties TWITTER_API_KEYS = new Properties();
     Logger logger = LoggerFactory.getLogger(TwitterProducer.class);
 
-    String consumerKey = "IDHkFiWlBa0p5THCivK03K5z9";
-    String consumerSecret = "chPUvpf0nx60kletteCpfZoe7QpHrtOdkesYO10iE23eiQi22F";
-    String token = "145125174-2yCbHbkBsvF4B6pKCGEvc28tfzrytoQylpzVSTSG";
-    String secret = "V5LYEorKEm1JCCG2LvSH0RH2vY70ujlEDjhJ8NBfRvjw0";
+    String consumerKey = null;
+    String consumerSecret = null;
+    String token = null;
+    String secret = null;
+
+    public void loadAPIKeys() {
+        InputStream apiKeyFile = this.getClass()
+                .getClassLoader()
+                .getResourceAsStream("apikey.properties");
+
+        try {
+            TWITTER_API_KEYS.load(apiKeyFile);
+            consumerKey = TWITTER_API_KEYS.getProperty("CONSUMER_KEY");
+            consumerSecret = TWITTER_API_KEYS.getProperty("CONSUMER_SECRET");
+            token = TWITTER_API_KEYS.getProperty("TOKEN");
+            secret = TWITTER_API_KEYS.getProperty("TOKEN_SECRET");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(0);
+        }
+    }
 
     public void run() throws InterruptedException {
         logger.info("Setup");
@@ -114,6 +135,8 @@ public class TwitterProducer {
 
     public static void main(String[] args) {
         TwitterProducer producer = new TwitterProducer();
+        producer.loadAPIKeys();
+
         try {
             producer.run();
         } catch (InterruptedException e) {

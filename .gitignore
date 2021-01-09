@@ -33,3 +33,6 @@ build/
 ### VS Code ###
 .vscode/
 .gradle
+
+### API KEYS ###
+/kafka-twitter/src/main/resources/apikey.properties
