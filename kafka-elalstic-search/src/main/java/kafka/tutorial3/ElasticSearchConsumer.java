@@ -6,6 +6,7 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.DefaultConnectionKeepAliveStrategy;
+import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.client.RequestOptions;
@@ -26,6 +27,7 @@ public class ElasticSearchConsumer {
     private Properties BONZAI_PROPERTIES = new Properties();
     private String BONSAI_URL;
     RestHighLevelClient client;
+    BulkRequest bulkRequest;
 
     public ElasticSearchConsumer() {
         //load bonzai properties
@@ -76,6 +78,20 @@ public class ElasticSearchConsumer {
 //        client.close();
     }
 
+    void addDatatToBulk(String tweet, String tweetId) throws IOException {
+        String index = "twitter";
+        String type = "tweets";
+
+        IndexRequest indexRequest = new IndexRequest(
+                index,
+                type,
+                tweetId //this is to make our request idempotent
+        )
+                .source(tweet, XContentType.JSON);
+
+        bulkRequest.add(indexRequest);
+    }
+
     public RestHighLevelClient restClient() {
         URI connUri = URI.create(BONSAI_URL);
         String[] auth = connUri.getUserInfo().split(":");
@@ -108,5 +124,14 @@ public class ElasticSearchConsumer {
             e.printStackTrace();
             System.exit(0);
         }
+    }
+
+    public void createBulkRequest() {
+        bulkRequest = new BulkRequest();
+    }
+
+    public void sendBulkData() throws IOException {
+        loggger.info("bulk data count : {}", bulkRequest.numberOfActions());
+        client.bulk(bulkRequest, RequestOptions.DEFAULT);
     }
 }
